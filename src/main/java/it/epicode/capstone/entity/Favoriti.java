@@ -18,4 +18,5 @@ public class Favoriti {
     @ManyToOne
     @JoinColumn(name = "esperienza_id")
     private Esperienza esperienza;
+
 }
