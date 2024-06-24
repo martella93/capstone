@@ -2,12 +2,15 @@ package it.epicode.capstone.controller;
 
 import it.epicode.capstone.dto.EsperienzaDto;
 import it.epicode.capstone.entity.Esperienza;
+import it.epicode.capstone.entity.Guida;
 import it.epicode.capstone.entity.Prenotazione;
 import it.epicode.capstone.exception.BadRequestException;
 import it.epicode.capstone.exception.EsperienzaNotFoundException;
 import it.epicode.capstone.service.EsperienzaService;
+import it.epicode.capstone.service.GuidaService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
@@ -29,6 +32,9 @@ public class EsperienzaController {
     @Autowired
     private EsperienzaService esperienzaService;
 
+    @Autowired
+    private GuidaService guidaService;
+
 
     @PostMapping
     @PreAuthorize("hasAnyAuthority('ADMIN')")
@@ -43,6 +49,7 @@ public class EsperienzaController {
     }
 
     @GetMapping
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'USER')")
     public List<Esperienza> getAllEsperienze() {
        return esperienzaService.getAllEsperienze();
     }
@@ -96,10 +103,18 @@ public class EsperienzaController {
     }
 
     @GetMapping("/cercaPerLuogo")
+    @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     public List<Esperienza> cercaPerLuogo(@RequestParam String luogo) {
         return esperienzaService.cercaPerLuogo(luogo);
     }
 
+
+    @GetMapping("/{esperienzaId}/guida")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'USER')")
+    public ResponseEntity<Guida> getGuidaByEsperienzaId(@PathVariable Integer esperienzaId) {
+        Guida guida = guidaService.getGuidaByEsperienzaId(esperienzaId);
+        return new ResponseEntity<>(guida, HttpStatus.OK);
+    }
 
 
 

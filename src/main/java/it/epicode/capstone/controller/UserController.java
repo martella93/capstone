@@ -7,6 +7,8 @@ import it.epicode.capstone.exception.UserNotFoundException;
 import it.epicode.capstone.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
 import org.springframework.validation.annotation.Validated;
@@ -54,5 +56,12 @@ public class UserController {
     public String deleteUser(@PathVariable int id){
         return userService.deleteUser(id);
     }
+
+
+    @GetMapping("/api/userLogged")
+    public User getUserLogged(){
+        return userService.getLoggedUser();
+    }
+
 
 }

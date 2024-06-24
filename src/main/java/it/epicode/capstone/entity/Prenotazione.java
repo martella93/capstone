@@ -25,9 +25,6 @@ public class Prenotazione {
     @JoinColumn(name = "user_id")
     private User user;
 
-//    @OneToMany(mappedBy = "prenotazione")
-//    private List<Recensione> recensioni;
-
     @ManyToOne
     @JoinColumn(name = "esperienza_id")
     private Esperienza esperienza;

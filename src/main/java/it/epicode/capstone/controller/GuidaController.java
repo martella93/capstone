@@ -8,6 +8,8 @@ import it.epicode.capstone.exception.GuidaNotFoundException;
 import it.epicode.capstone.repository.EsperienzaRepository;
 import it.epicode.capstone.service.GuidaService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
@@ -29,13 +31,13 @@ public class GuidaController {
     private EsperienzaRepository esperienzaRepository;
 
     @GetMapping
-    @PreAuthorize("hasAnyAuthority('ADMIN')")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'USER')")
     public List<Guida> getAllGuida() {
         return guidaService.getAllGuida();
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyAuthority('ADMIN')")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'USER')")
     public Guida getGuidaById(@PathVariable int id) {
         Optional<Guida> guidaOptional = guidaService.getGuidaById(id);
 
@@ -89,6 +91,8 @@ public class GuidaController {
     public String uploadVideoGuida(@PathVariable int id, @RequestBody List<MultipartFile> video) throws IOException {
         return guidaService.uploadVideoGuida(id, video);
     }
+
+
 
 
 

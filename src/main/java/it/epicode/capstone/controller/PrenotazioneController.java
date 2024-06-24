@@ -4,9 +4,11 @@ import it.epicode.capstone.entity.Prenotazione;
 import it.epicode.capstone.exception.PrenotazioneNotFoundException;
 import it.epicode.capstone.service.PrenotazioneService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -42,5 +44,17 @@ public class PrenotazioneController {
     @PreAuthorize("hasAnyAuthority('USER')")
     public String cancellaPrenotazione(@PathVariable int id) {
          return prenotazioneService.deletePrenotazione(id);
+    }
+
+    @GetMapping("/user")
+    @PreAuthorize("hasAnyAuthority('USER')")
+    public List<Prenotazione> getPrenotazioniByUser() {
+        return prenotazioneService.getPrenotazioniByUser();
+    }
+
+    @GetMapping("/postiPrenotati/{id}")
+    public ResponseEntity<Integer> getPostiPrenotati(@PathVariable int esperienzaId, @RequestParam LocalDate data) {
+        int postiPrenotati = prenotazioneService.countPostiPrenotatiByEsperienzaIdAndData(esperienzaId, data);
+        return ResponseEntity.ok(postiPrenotati);
     }
 }

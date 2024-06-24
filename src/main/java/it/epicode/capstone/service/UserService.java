@@ -2,6 +2,7 @@ package it.epicode.capstone.service;
 
 import it.epicode.capstone.dto.SignupDto;
 import it.epicode.capstone.dto.UserDto;
+import it.epicode.capstone.entity.Favoriti;
 import it.epicode.capstone.entity.Role;
 import it.epicode.capstone.entity.User;
 import it.epicode.capstone.exception.BadRequestException;
@@ -14,8 +15,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.GetMapping;
 
 import java.util.List;
 import java.util.Optional;
@@ -114,4 +119,22 @@ public class UserService {
     public Optional<User> getUserById(Integer id) {
         return userRepository.findById(id);
     }
+
+    public Integer findUserIdByUsername(String username) {
+        User user = userRepository.findUserByUsername(username);
+        return user != null ? user.getId() : null;
+    }
+
+    public User getLoggedUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.getPrincipal() instanceof User) {
+            return (User) authentication.getPrincipal();
+        }
+        return null;
+    }
+
+
+
+
+
 }

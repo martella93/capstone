@@ -178,15 +178,19 @@ public String uploadImmagineEsperienza(int id, List<MultipartFile> foto) throws 
         Esperienza esperienza = esperienzaRepository.findById(esperienzaId)
                 .orElseThrow(() -> new EsperienzaNotFoundException("Esperienza with id " + esperienzaId + " not found"));
 
-        LocalDate today = LocalDate.now();
+        LocalDate dataPrenotazione = prenotazione.getDataPrenotazione();
+
+        // Verifica che la data di prenotazione non sia null
+        if (dataPrenotazione == null) {
+            throw new IllegalArgumentException("La data di prenotazione non può essere null");
+        }
 
         // Verifica se la data di prenotazione rientra nell'intervallo di date dell'esperienza
-        if (today.isBefore(esperienza.getDataInizio()) || today.isAfter(esperienza.getDataFine())) {
+        if (dataPrenotazione.isBefore(esperienza.getDataInizio()) || dataPrenotazione.isAfter(esperienza.getDataFine())) {
             throw new DataNonDisponibileException("La data selezionata non rientra nell'intervallo disponibile per questa esperienza");
         }
 
         // Verifica se ci sono abbastanza posti disponibili per la data specifica della prenotazione
-        LocalDate dataPrenotazione = prenotazione.getDataPrenotazione();
         Optional<DatePrenotate> datePrenotateOpt = datePrenotateRepository.findByEsperienzaAndDataPrenotata(esperienza, dataPrenotazione);
 
         int postiDisponibili = esperienza.getPostiEsperienza();
@@ -201,25 +205,22 @@ public String uploadImmagineEsperienza(int id, List<MultipartFile> foto) throws 
         // Imposta l'utente e l'esperienza nella prenotazione
         prenotazione.setEsperienza(esperienza);
         prenotazione.setUser(user);
-        prenotazione.setDataPrenotazione(today);
 
         // Aggiorna o crea un nuovo record per le date prenotate
         DatePrenotate datePrenotate;
         if (datePrenotateOpt.isPresent()) {
             datePrenotate = datePrenotateOpt.get();
-            datePrenotate.setDataPrenotata(prenotazione.getData());
             datePrenotate.setPostiPrenotati(datePrenotate.getPostiPrenotati() + prenotazione.getPostiPrenotati());
         } else {
             datePrenotate = new DatePrenotate();
             datePrenotate.setEsperienza(esperienza);
             datePrenotate.setPostiPrenotati(prenotazione.getPostiPrenotati());
-            datePrenotate.setDataPrenotata(prenotazione.getData());
             datePrenotate.setDataPrenotata(dataPrenotazione);
         }
         datePrenotateRepository.save(datePrenotate);
 
-        user.setPuntiGuadagnati(esperienza.getPuntiEsperienza());
-        esperienzaRepository.save(esperienza);
+        user.setPuntiGuadagnati(user.getPuntiGuadagnati() + esperienza.getPuntiEsperienza());
+        userRepository.save(user);
 
         sendMail(user.getEmail());
 

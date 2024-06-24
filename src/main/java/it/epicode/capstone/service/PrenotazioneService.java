@@ -10,8 +10,11 @@ import it.epicode.capstone.repository.EsperienzaRepository;
 import it.epicode.capstone.repository.PrenotazioneRepository;
 import it.epicode.capstone.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -26,6 +29,9 @@ public class PrenotazioneService {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private UserService userService;
 
     @Autowired
     private DatePrenotateRepository datePrenotateRepository;
@@ -72,4 +78,16 @@ public class PrenotazioneService {
     public boolean hasPrenotazioneForUserAndEsperienza(int id, int esperienzaId) {
         return prenotazioneRepository.existsByUserIdAndEsperienzaId(id , esperienzaId);
     }
+
+    public List<Prenotazione> getPrenotazioniByUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        Integer userId = userService.findUserIdByUsername(username);
+        return prenotazioneRepository.findPrenotazioniByUserId(userId);
+    }
+
+    public int countPostiPrenotatiByEsperienzaIdAndData(int esperienzaId, LocalDate data) {
+        return (int) prenotazioneRepository.countByEsperienzaIdAndDataPrenotazione(esperienzaId, data);
+    }
+
 }

@@ -132,4 +132,9 @@ public class GuidaService {
             throw new GuidaNotFoundException("Guida con ID " + id + " non trovata");
         }
     }
+
+    public Guida getGuidaByEsperienzaId(int esperienzaId) {
+        Optional<Guida> guidaOptional = guidaRepository.findByEsperienzaId(esperienzaId);
+        return guidaOptional.orElseThrow(() -> new GuidaNotFoundException("Guida for Esperienza with id " + esperienzaId + " not found"));
+    }
 }

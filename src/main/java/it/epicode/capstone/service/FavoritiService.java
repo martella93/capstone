@@ -4,6 +4,7 @@ import it.epicode.capstone.entity.Esperienza;
 import it.epicode.capstone.entity.Favoriti;
 import it.epicode.capstone.entity.User;
 import it.epicode.capstone.exception.EsperienzaNotFoundException;
+import it.epicode.capstone.exception.NotFoundException;
 import it.epicode.capstone.repository.EsperienzaRepository;
 import it.epicode.capstone.repository.FavoritiRepository;
 import it.epicode.capstone.repository.UserRepository;
@@ -32,6 +33,11 @@ public class FavoritiService {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         User user = (User) authentication.getPrincipal();
 
+        Favoriti existingFavorito = favoritiRepository.findByUserAndEsperienza_Id(user, esperienzaId);
+        if (existingFavorito != null) {
+            throw new IllegalStateException("L'esperienza con id " + esperienzaId + " è già nei preferiti dell'utente");
+        }
+
         Esperienza esperienza = esperienzaRepository.findById(esperienzaId).orElseThrow(() -> new EsperienzaNotFoundException("Esperienza con id " + esperienzaId + " not found"));
         Favoriti favorito = new Favoriti();
         favorito.setUser(user);
@@ -41,19 +47,34 @@ public class FavoritiService {
     }
 
     public String removeFavorito(int esperienzaId) {
+        // Ottieni l'utente autenticato dal contesto di sicurezza
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !(authentication.getPrincipal() instanceof User)) {
+            throw new IllegalStateException("Utente non autenticato o tipo di utente non valido");
+        }
+
         User user = (User) authentication.getPrincipal();
 
-        Esperienza esperienza = esperienzaRepository.findById(esperienzaId).orElseThrow(() -> new EsperienzaNotFoundException("Esperienza con id " + esperienzaId + " not found"));
-        Favoriti favorito = favoritiRepository.findByUserAndEsperienza(user, esperienza).orElseThrow(() -> new EsperienzaNotFoundException("Esperienza con id " + esperienzaId + " not found"));
-        favoritiRepository.delete(favorito);
+        // Trova l'esperienza dal repository
+        Esperienza esperienza = esperienzaRepository.findById(esperienzaId)
+                .orElseThrow(() -> new EsperienzaNotFoundException("Esperienza con id " + esperienzaId + " non trovata"));
+
+        // Trova il favorito corrispondente dal repository
+        List<Favoriti> favoritiList = favoritiRepository.findByUserAndEsperienza(user, esperienza);
+        if (favoritiList.isEmpty()) {
+            throw new NotFoundException("Favorito con esperienza id " + esperienzaId + " non trovato");
+        }
+
+        // Rimuovi il favorito dal repository (considerando che potrebbero essercene più di uno)
+        for (Favoriti favorito : favoritiList) {
+            favoritiRepository.delete(favorito);
+        }
+
         return "Favorito rimosso";
     }
 
-    public List<Esperienza> getFavorites() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        User user = (User) authentication.getPrincipal();
-        List<Favoriti> favorites = favoritiRepository.findByUser(user);
-        return favorites.stream().map(Favoriti:: getEsperienza).collect(Collectors.toList());
+
+    public List<Favoriti> getFavoritiByUser(User user) {
+        return favoritiRepository.findByUser(user);
     }
 }

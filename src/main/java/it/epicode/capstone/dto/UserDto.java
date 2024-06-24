@@ -4,6 +4,11 @@ import it.epicode.capstone.entity.Role;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+
+import java.util.Collection;
+import java.util.List;
 
 @Data
 public class UserDto {
@@ -22,4 +27,6 @@ public class UserDto {
     private int puntiGuadagnati;
 
     private Role role;
+
+
 }

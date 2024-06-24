@@ -35,6 +35,7 @@ public class Config implements WebMvcConfigurer {
 
         httpSecurity.authorizeRequests(http -> http.requestMatchers("/**").permitAll());
 
+
         return httpSecurity.build();
     }
 

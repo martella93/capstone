@@ -1,5 +1,6 @@
 package it.epicode.capstone.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import lombok.Data;
@@ -28,12 +29,15 @@ public class User implements UserDetails {
     private Role role;
 
     @OneToMany(mappedBy = "user")
+    @JsonIgnore
     private List<Prenotazione> prenotazioni;
 
     @OneToMany(mappedBy = "user")
+    @JsonIgnore
     private List<Recensione> recensione;
 
     @OneToMany(mappedBy = "user")
+    @JsonIgnore
     private List<Favoriti> favoriti = new ArrayList<>();
 
 
